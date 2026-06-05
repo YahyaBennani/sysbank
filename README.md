@@ -1,4 +1,4 @@
-# BankSys — Application Bancaire Sécurisée
+# BankSys — Application Bancaire Sécurisée By GCDSTE4 
 
 > Plateforme de transactions financières avec authentification 2FA, contrôle OFAC, paiement QR Code et API mobile Android.
 
