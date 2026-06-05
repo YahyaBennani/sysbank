@@ -1,0 +1,62 @@
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres:16-alpine
+    container_name: banksys-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: bankapp
+      POSTGRES_USER: bankuser
+      POSTGRES_PASSWORD: BankPass2026!
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - banksys-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bankuser -d bankapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: yahyabennani5/banksys-backend:latest
+    container_name: banksys-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/bankapp
+      SPRING_DATASOURCE_USERNAME: bankuser
+      SPRING_DATASOURCE_PASSWORD: BankPass2026!
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      JWT_SECRET: c2VjcmV0LWJhbmstYXBwLWtleS0yMDI2LXN1cGVyLXNlY3VyZS1taW5pbXVtLTI1Ni1iaXRz
+      JWT_ACCESS_TOKEN_EXPIRATION: 900000
+      JWT_REFRESH_TOKEN_EXPIRATION: 604800000
+      ADMIN_EMAIL: admin@bank.com
+      ADMIN_PASSWORD: Admin123!
+      ADMIN_USERNAME: admin
+    ports:
+      - "8080:8080"
+    networks:
+      - banksys-net
+
+  frontend:
+    image: yahyabennani5/banksys-frontend:latest
+    container_name: banksys-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    networks:
+      - banksys-net
+
+volumes:
+  postgres_data:
+
+networks:
+  banksys-net:
+    driver: bridge
